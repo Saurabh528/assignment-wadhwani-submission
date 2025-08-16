@@ -1,0 +1,1408 @@
+================================================================================
+                    EDUCATIONAL VIDEO GENERATION SYSTEM
+                           COMPLETE ARCHITECTURE DOCUMENT
+================================================================================
+
+Version: 1.0.0
+Last Updated: 2025-08-16
+Project: AI-Powered Educational Video Content Factory
+
+================================================================================
+                                TABLE OF CONTENTS
+================================================================================
+
+1. SYSTEM OVERVIEW
+2. HIGH-LEVEL ARCHITECTURE
+3. CORE MODULES
+4. AI AGENTS
+5. API LAYER
+6. DATABASE ARCHITECTURE
+7. OPEN SOURCE INTEGRATIONS
+8. PROMPT ENGINEERING
+9. WORKFLOW & DATA FLOW
+10. FEATURES & FUNCTIONALITY
+11. TECHNICAL SPECIFICATIONS
+12. DEPLOYMENT & INFRASTRUCTURE
+13. COST ANALYSIS
+14. SECURITY & PRIVACY
+15. TESTING & QUALITY ASSURANCE
+
+================================================================================
+1. SYSTEM OVERVIEW
+================================================================================
+
+PROJECT NAME: Educational Video Generation System
+PURPOSE: AI-powered platform for creating educational videos with avatars, 
+         voice synthesis, and automated content generation
+TECHNOLOGY STACK: Python, Streamlit, FastAPI, OpenAI APIs, MoviePy, SadTalker
+ARCHITECTURE PATTERN: Modular Microservices with AI Agent Orchestration
+
+KEY CAPABILITIES:
+- Automated curriculum generation using GPT-4
+- Character creation with AI-generated avatars
+- Script generation with scene-by-scene dialogue
+- Voice synthesis with 8 voice styles and 3 genders
+- Video generation with avatar lip-sync
+- Quality assurance and testing automation
+- Cost estimation and optimization
+
+================================================================================
+2. HIGH-LEVEL ARCHITECTURE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              USER INTERFACE LAYER                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Streamlit Dashboard (app.py)                                               │
+│  - Curriculum Management                                                    │
+│  - Character Management                                                     │
+│  - Script Generation                                                        │
+│  - Video Generation                                                         │
+│  - Voice Testing & Preview                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              API LAYER                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  FastAPI Backend (api/main.py)                                             │
+│  - RESTful endpoints                                                        │
+│  - Request/Response handling                                                │
+│  - CORS middleware                                                          │
+│  - Job management                                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              CORE MODULES LAYER                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Core/                                                                       │
+│  ├── tts_manager.py (Voice Synthesis)                                       │
+│  ├── avatar_manager.py (Avatar Generation)                                  │
+│  ├── character_manager.py (Character DB)                                    │
+│  ├── video_generator.py (Video Creation)                                    │
+│  ├── avatar_video_generator.py (Avatar Videos)                              │
+│  ├── sadtalker_manager.py (Lip-sync)                                        │
+│  ├── latentsync_manager.py (Alternative Sync)                               │
+│  └── openai_tts_manager.py (Advanced TTS)                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              AI AGENTS LAYER                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Agents/                                                                     │
+│  ├── curriculum_agent.py (Curriculum Generation)                            │
+│  ├── script_agent.py (Script Creation)                                      │
+│  └── qa_agent.py (Quality Assurance)                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              EXTERNAL SERVICES                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  OpenAI APIs                                                                │
+│  ├── GPT-4 (Text Generation)                                                │
+│  ├── DALL-E 3 (Image Generation)                                            │
+│  └── TTS-1 (Voice Synthesis)                                                │
+│                                                                              │
+│  Open Source Tools                                                          │
+│  ├── SadTalker (Lip-sync)                                                   │
+│  ├── MoviePy (Video Processing)                                             │
+│  ├── FFmpeg (Audio/Video)                                                   │
+│  └── SQLite (Database)                                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+3. CORE MODULES DETAILED
+================================================================================
+
+3.1 TTS MANAGER (core/tts_manager.py)
+---------------------------------------
+PURPOSE: Text-to-Speech synthesis with character-specific voice mapping
+RESPONSIBILITIES:
+- Voice style mapping (8 styles × 3 genders = 24 combinations)
+- OpenAI TTS integration
+- Audio file generation and management
+- Voice consistency validation
+
+VOICE MAPPING LOGIC:
+- Male_Professional → "onyx" (Deep, authoritative)
+- Female_Friendly → "shimmer" (Bright, engaging)
+- Neutral_Energetic → "echo" (Warm, friendly)
+- Male_Confident → "onyx" (Deep, authoritative)
+- Female_Playful → "shimmer" (Bright, engaging)
+- Neutral_Technical → "alloy" (Balanced, versatile)
+
+METHODS:
+- generate_voiceover(text, character, output_path)
+- generate_batch_voiceovers(scenes)
+- ensure_voice_consistency(character_name, scenes)
+- get_voice_style_descriptions()
+- get_voice_characteristics()
+- get_voice_mapping_info(gender, style)
+
+3.2 AVATAR MANAGER (core/avatar_manager.py)
+--------------------------------------------
+PURPOSE: AI-generated character avatars using DALL-E 3
+RESPONSIBILITIES:
+- Character avatar generation
+- Prompt engineering for avatar creation
+- Avatar storage and management
+- Placeholder avatar creation
+
+AVATAR GENERATION PROCESS:
+1. Character details analysis (gender, voice_style, description)
+2. Dynamic prompt construction
+3. DALL-E 3 API call
+4. Image processing and storage
+5. Avatar path management
+
+PROMPT TEMPLATE:
+"Professional portrait photograph of a {gender} {role}
+Appearance: {appearance}
+Expression: {voice_style} and approachable demeanor, warm smile, direct eye contact
+Technical specifications:
+- Front-facing portrait, shoulders and head visible
+- Centered in frame
+- Professional studio lighting
+- Clean, neutral background
+- Photorealistic style
+- High detail facial features for animation"
+
+3.3 CHARACTER MANAGER (core/character_manager.py)
+--------------------------------------------------
+PURPOSE: Character database management and CRUD operations
+RESPONSIBILITIES:
+- Character creation and storage
+- Character retrieval and updates
+- Avatar path management
+- Usage tracking
+
+DATABASE SCHEMA:
+- id (PRIMARY KEY)
+- name (UNIQUE)
+- description
+- voice_style
+- gender
+- created_at
+- usage_count
+- avatar_path
+
+METHODS:
+- add_character(character_data, generate_avatar)
+- get_character(name)
+- get_all_characters()
+- update_avatar_path(name, avatar_path)
+- delete_character(name)
+- increment_usage(name)
+
+3.4 VIDEO GENERATOR (core/video_generator.py)
+----------------------------------------------
+PURPOSE: Main video generation pipeline
+RESPONSIBILITIES:
+- Scene-based video creation
+- Image generation for scenes
+- Audio-visual synchronization
+- Video composition and rendering
+
+VIDEO GENERATION PROCESS:
+1. Script parsing and scene extraction
+2. Image generation for each scene
+3. Audio synthesis for dialogue
+4. Video clip creation from images
+5. Audio-video synchronization
+6. Crossfade transitions
+7. Caption overlay
+8. Final video composition
+
+FEATURES:
+- Multiple image generation per scene
+- Audio duration matching
+- Smooth transitions
+- Caption synchronization
+- Quality optimization
+
+3.5 AVATAR VIDEO GENERATOR (core/avatar_video_generator.py)
+------------------------------------------------------------
+PURPOSE: Split-screen videos with avatar and educational content
+RESPONSIBILITIES:
+- Avatar video creation
+- Split-screen layout management
+- Lip-sync integration
+- Educational content visualization
+
+LAYOUT CONFIGURATION:
+- Avatar: 1/4 screen width (left side)
+- Content: 3/4 screen width (right side)
+- Resolution: 1920x1080
+- FPS: 30
+
+FEATURES:
+- Static avatar videos (placeholder)
+- SadTalker lip-sync integration
+- Educational content generation
+- Audio synchronization
+- Caption overlay
+
+3.6 SADTALKER MANAGER (core/sadtalker_manager.py)
+--------------------------------------------------
+PURPOSE: Lip-sync video generation using SadTalker
+RESPONSIBILITIES:
+- SadTalker integration
+- Lip-sync video generation
+- Audio-visual synchronization
+- Quality optimization
+
+SADTALKER PROCESS:
+1. Avatar image preparation
+2. Audio file processing
+3. SadTalker model execution
+4. Lip-sync video generation
+5. Quality enhancement
+6. Output video creation
+
+CONFIGURATION:
+- Model: SadTalker
+- Input: Avatar image + Audio file
+- Output: Lip-sync video
+- Quality: Enhanced with GFPGAN
+
+3.7 LATENTSYNC MANAGER (core/latentsync_manager.py)
+----------------------------------------------------
+PURPOSE: Alternative lip-sync method using latent space manipulation
+RESPONSIBILITIES:
+- Latent space video generation
+- Audio-driven animation
+- Alternative to SadTalker
+- Experimental lip-sync
+
+3.8 OPENAI TTS MANAGER (core/openai_tts_manager.py)
+----------------------------------------------------
+PURPOSE: Advanced TTS with custom instructions
+RESPONSIBILITIES:
+- Custom voice instructions
+- Multiple OpenAI voices
+- Quality and speed control
+- Advanced TTS features
+
+FEATURES:
+- Voice instruction embedding
+- Speed control (0.25x to 4.0x)
+- Quality settings (Standard/HD)
+- Voice preview functionality
+- Parameter validation
+
+================================================================================
+4. AI AGENTS DETAILED
+================================================================================
+
+4.1 CURRICULUM AGENT (agents/curriculum_agent.py)
+--------------------------------------------------
+PURPOSE: Automated curriculum generation using GPT-4
+RESPONSIBILITIES:
+- Topic analysis and curriculum planning
+- Lesson structure generation
+- Educational content organization
+- Learning objective alignment
+
+CURRICULUM GENERATION PROCESS:
+1. Topic analysis and scope definition
+2. Learning objective identification
+3. Lesson structure planning
+4. Content generation for each lesson
+5. JSON format output
+
+PROMPT STRUCTURE:
+"""
+Create a structured curriculum for the topic: "{topic}"
+Generate exactly {num_lessons} lessons.
+
+Each lesson must have:
+1. Title (engaging and descriptive)
+2. Introduction (hook the viewer, 2-3 sentences)
+3. Main Body (core content, 3-4 key points)
+4. Summary/CTA (recap and call-to-action)
+
+Format as JSON with this structure:
+{
+    "topic": "{topic}",
+    "lessons": [
+        {
+            "title": "...",
+            "introduction": "...",
+            "main_body": "...",
+            "summary": "..."
+        }
+    ]
+}
+"""
+
+OUTPUT FORMAT:
+- JSON structure with topic and lessons
+- Each lesson contains title, introduction, main_body, summary
+- Structured for video script generation
+
+4.2 SCRIPT AGENT (agents/script_agent.py)
+------------------------------------------
+PURPOSE: Video script generation with character dialogue
+RESPONSIBILITIES:
+- Scene-based script creation
+- Character dialogue generation
+- Visual prompt creation
+- Scene timing and structure
+
+SCRIPT GENERATION PROCESS:
+1. Lesson content analysis
+2. Character assignment and dialogue creation
+3. Scene breakdown and timing
+4. Visual prompt generation
+5. Caption and overlay planning
+
+PROMPT STRUCTURE:
+"""
+Create a video script for this lesson:
+Title: {lesson['title']}
+Introduction: {lesson['introduction']}
+Main Body: {lesson['main_body']}
+Summary: {lesson['summary']}
+
+Use these characters:
+{json.dumps(characters[:2])}
+
+Requirements:
+- 4 to 8 scenes total
+- For each scene, craft the "visual" as a concise yet detailed image-generation prompt derived directly from the scene's dialogue so the image best depicts what is being said. Avoid including on-image text instructions. Use concrete nouns, setting, lighting, camera angle, mood, and style suitable for educational content.
+- Keep "duration" realistic for the spoken dialogue.
+
+Return as JSON with structure:
+{
+    "scenes": [
+        {
+            "scene_number": 1,
+            "duration": 5,
+            "visual": "A detailed image prompt derived from the dialogue",
+            "character": "Character name",
+            "dialogue": "What the character says",
+            "captions": "Text overlay if any"
+        }
+    ]
+}
+"""
+
+OUTPUT FORMAT:
+- JSON structure with scenes array
+- Each scene contains scene_number, duration, visual, character, dialogue, captions
+- Visual prompts optimized for DALL-E 3 generation
+
+4.3 QA AGENT (agents/qa_agent.py)
+----------------------------------
+PURPOSE: Quality assurance and video analysis
+RESPONSIBILITIES:
+- Video quality assessment
+- Audio-visual synchronization check
+- Character consistency validation
+- Caption alignment verification
+
+QA PROCESS:
+1. Video file analysis
+2. Audio synchronization check
+3. Character consistency validation
+4. Caption alignment verification
+5. Quality score calculation
+6. Issue identification and reporting
+
+QUALITY METRICS:
+- Audio Sync Score (0-100)
+- Character Consistency Score (0-100)
+- Caption Alignment Score (0-100)
+- Overall Quality Score
+
+METHODS:
+- run_checks(video_paths)
+- _analyze_video(video_path)
+- check_audio_sync(video)
+- check_character_consistency(video)
+- check_caption_alignment(video)
+- _identify_issues(results)
+
+================================================================================
+5. API LAYER DETAILED
+================================================================================
+
+5.1 FASTAPI BACKEND (api/main.py)
+----------------------------------
+PURPOSE: RESTful API for system integration
+RESPONSIBILITIES:
+- HTTP endpoint management
+- Request/response handling
+- CORS middleware
+- Job management
+- Error handling
+
+ENDPOINTS:
+
+GET / - Health check
+POST /api/curriculum/generate - Curriculum generation
+POST /api/characters/create - Character creation
+GET /api/characters/list - Character listing
+POST /api/videos/generate - Video generation
+GET /api/videos/status/{job_id} - Job status
+POST /api/tts/generate - TTS generation
+GET /api/voices/available - Available voices
+
+PYDANTIC MODELS:
+- TopicRequest: topic, num_lessons, language
+- CurriculumResponse: topic, lessons, created_at
+- CharacterRequest: name, description, voice_style, gender, generate_avatar
+- CharacterResponse: id, name, description, voice_style, gender, avatar_path, created_at, usage_count
+- VideoGenerationRequest: curriculum_id, character_names, use_avatar_videos, use_lip_sync, video_length
+- VideoGenerationResponse: job_id, status, videos, qa_results
+
+FEATURES:
+- Async/await support
+- Automatic request validation
+- CORS middleware
+- Error handling with HTTPException
+- Job tracking and status updates
+
+================================================================================
+6. DATABASE ARCHITECTURE
+================================================================================
+
+6.1 DATABASE MODELS (database/models.py)
+-----------------------------------------
+PURPOSE: SQLite database management and ORM
+RESPONSIBILITIES:
+- Database initialization
+- Table creation and management
+- CRUD operations
+- Data validation
+
+DATABASE SCHEMA:
+
+CHARACTERS TABLE:
+- id (INTEGER PRIMARY KEY AUTOINCREMENT)
+- name (TEXT UNIQUE NOT NULL)
+- description (TEXT)
+- voice_style (TEXT)
+- gender (TEXT)
+- created_at (TIMESTAMP)
+- usage_count (INTEGER DEFAULT 0)
+
+PROJECTS TABLE:
+- id (INTEGER PRIMARY KEY AUTOINCREMENT)
+- name (TEXT NOT NULL)
+- topic (TEXT)
+- num_lessons (INTEGER)
+- video_length (INTEGER)
+- language (TEXT)
+- created_at (TIMESTAMP)
+- status (TEXT DEFAULT 'pending')
+
+VIDEOS TABLE:
+- id (INTEGER PRIMARY KEY AUTOINCREMENT)
+- project_id (INTEGER, FOREIGN KEY)
+- lesson_number (INTEGER)
+- title (TEXT)
+- script (TEXT)
+- video_path (TEXT)
+- duration (REAL)
+- created_at (TIMESTAMP)
+- qa_score (REAL)
+
+QA_REPORTS TABLE:
+- id (INTEGER PRIMARY KEY AUTOINCREMENT)
+- video_id (INTEGER, FOREIGN KEY)
+- audio_sync_score (REAL)
+- character_consistency_score (REAL)
+- caption_alignment_score (REAL)
+- issues (TEXT)
+- created_at (TIMESTAMP)
+
+MODEL CLASSES:
+- DatabaseModels: Database initialization and table creation
+- ProjectModel: Project CRUD operations
+- CharacterModel: Character CRUD operations
+- VideoModel: Video CRUD operations
+- QAReportModel: QA report CRUD operations
+
+METHODS:
+- create_project(project_data)
+- get_project(project_id)
+- update_project(project_id, updates)
+- delete_project(project_id)
+- list_projects()
+- create_character(character_data)
+- get_character(character_id)
+- update_character(character_id, updates)
+- delete_character(character_id)
+- list_characters()
+- create_video(video_data)
+- get_video(video_id)
+- update_video(video_id, updates)
+- list_videos(project_id)
+- create_qa_report(qa_data)
+- get_qa_report(video_id)
+- list_qa_reports()
+
+================================================================================
+7. OPEN SOURCE INTEGRATIONS
+================================================================================
+
+7.1 SADTALKER INTEGRATION
+-------------------------
+PURPOSE: Lip-sync video generation
+LOCATION: sadtalker/
+RESPONSIBILITIES:
+- Audio-driven talking face generation
+- Lip-sync animation
+- Video quality enhancement
+- Model management
+
+SADTALKER COMPONENTS:
+- inference.py: Main inference logic
+- predict.py: Prediction pipeline
+- launcher.py: Model launcher
+- app_sadtalker.py: Web interface
+- src/: Source code directory
+- checkpoints/: Model weights
+- gfpgan/: Face enhancement
+
+CONFIGURATION:
+- Model: SadTalker
+- Input: Avatar image + Audio file
+- Output: Lip-sync video
+- Enhancement: GFPGAN face enhancement
+- Quality: High-definition output
+
+7.2 MOVIEPY INTEGRATION
+-----------------------
+PURPOSE: Video processing and composition
+RESPONSIBILITIES:
+- Video clip creation
+- Audio-video synchronization
+- Video composition
+- Effects and transitions
+
+MOVIEPY COMPONENTS:
+- VideoFileClip: Video file handling
+- AudioFileClip: Audio file handling
+- CompositeVideoClip: Video composition
+- ImageClip: Image to video conversion
+- concatenate_videoclips: Video concatenation
+
+FEATURES:
+- Video format conversion
+- Audio extraction and manipulation
+- Video effects and transitions
+- Frame manipulation
+- Quality optimization
+
+7.3 FFMPEG INTEGRATION
+----------------------
+PURPOSE: Audio/video processing backend
+RESPONSIBILITIES:
+- Video encoding/decoding
+- Audio processing
+- Format conversion
+- Quality optimization
+
+FFMPEG USAGE:
+- Video compression
+- Audio extraction
+- Format conversion
+- Quality optimization
+- Metadata handling
+
+7.4 SQLITE INTEGRATION
+----------------------
+PURPOSE: Local database storage
+RESPONSIBILITIES:
+- Data persistence
+- CRUD operations
+- Transaction management
+- Data integrity
+
+SQLITE FEATURES:
+- ACID compliance
+- Transaction support
+- Foreign key constraints
+- Index optimization
+- Backup and recovery
+
+================================================================================
+8. PROMPT ENGINEERING
+================================================================================
+
+8.1 CURRICULUM GENERATION PROMPTS
+----------------------------------
+SYSTEM PROMPT: "You are an expert educational content creator."
+
+USER PROMPT TEMPLATE:
+"""
+Create a structured curriculum for the topic: "{topic}"
+Generate exactly {num_lessons} lessons.
+
+Each lesson must have:
+1. Title (engaging and descriptive)
+2. Introduction (hook the viewer, 2-3 sentences)
+3. Main Body (core content, 3-4 key points)
+4. Summary/CTA (recap and call-to-action)
+
+Format as JSON with this structure:
+{
+    "topic": "{topic}",
+    "lessons": [
+        {
+            "title": "...",
+            "introduction": "...",
+            "main_body": "...",
+            "summary": "..."
+        }
+    ]
+}
+"""
+
+8.2 SCRIPT GENERATION PROMPTS
+------------------------------
+SYSTEM PROMPT: "You are a video script writer. Always ensure the visual prompt illustrates the dialogue vividly and clearly."
+
+USER PROMPT TEMPLATE:
+"""
+Create a video script for this lesson:
+Title: {lesson['title']}
+Introduction: {lesson['introduction']}
+Main Body: {lesson['main_body']}
+Summary: {lesson['summary']}
+
+Use these characters:
+{json.dumps(characters[:2])}
+
+Requirements:
+- 4 to 8 scenes total
+- For each scene, craft the "visual" as a concise yet detailed image-generation prompt derived directly from the scene's dialogue so the image best depicts what is being said. Avoid including on-image text instructions. Use concrete nouns, setting, lighting, camera angle, mood, and style suitable for educational content.
+- Keep "duration" realistic for the spoken dialogue.
+
+Return as JSON with structure:
+{
+    "scenes": [
+        {
+            "scene_number": 1,
+            "duration": 5,
+            "visual": "A detailed image prompt derived from the dialogue",
+            "character": "Character name",
+            "dialogue": "What the character says",
+            "captions": "Text overlay if any"
+        }
+    ]
+}
+"""
+
+8.3 AVATAR GENERATION PROMPTS
+------------------------------
+PROMPT TEMPLATE:
+"""
+Professional portrait photograph of a {gender} {role}
+
+Appearance: {appearance}
+Expression: {voice_style} and approachable demeanor, warm smile, direct eye contact
+
+Technical specifications:
+- Front-facing portrait, shoulders and head visible
+- Centered in frame
+- Professional studio lighting
+- Clean, neutral background (light gray or soft gradient)
+- Photorealistic style
+- High detail facial features for animation
+- Natural skin tones
+- No text or watermarks
+- No accessories blocking face
+"""
+
+ROLE MAPPING:
+- Professional → "educator or professor"
+- Friendly → "teacher or mentor"
+- Energetic → "motivational speaker or coach"
+- Calm → "counselor or guide"
+- Confident → "instructor"
+- Playful → "instructor"
+- Narrative → "instructor"
+- Technical → "instructor"
+
+8.4 IMAGE GENERATION PROMPTS
+-----------------------------
+EDUCATIONAL CONTENT PROMPT:
+"Educational illustration: {description}. Professional, clean, suitable for learning content."
+
+VISUAL PROMPT ENGINEERING:
+"""
+You are a visual prompt engineer. Convert the spoken dialogue into a highly specific, photorealistic image prompt. Include setting, subject, key objects, composition, lens and depth of field, lighting (cinematic/soft/natural), mood, color palette, and style. The image must directly reflect the semantics of the dialogue. Avoid any on-image text or watermarks. One vivid sentence only.
+"""
+
+DALL-E ULTRA-PHOTOREALISTIC:
+"Ultra-photorealistic photograph. {description}. Cinematic lighting, shallow depth of field, realistic textures, high detail skin, no text, no watermark."
+
+8.5 VOICE INSTRUCTION PROMPTS
+------------------------------
+BASIC TTS:
+"Speak in a natural and clear voice."
+
+CUSTOM INSTRUCTIONS:
+"[Voice instructions: {instructions}] {text}"
+
+VOICE STYLE DESCRIPTIONS:
+- Professional: "Clear, authoritative voice suitable for educational content"
+- Friendly: "Warm, approachable voice that builds rapport"
+- Energetic: "Dynamic, enthusiastic voice that engages learners"
+- Calm: "Soothing, patient voice for complex topics"
+- Confident: "Self-assured, commanding presence"
+- Playful: "Fun, engaging voice for younger audiences"
+- Narrative: "Storytelling voice with natural flow"
+- Technical: "Precise, detailed voice for complex subjects"
+
+================================================================================
+9. WORKFLOW & DATA FLOW
+================================================================================
+
+9.1 COMPLETE VIDEO GENERATION WORKFLOW
+---------------------------------------
+
+STEP 1: CURRICULUM GENERATION
+Input: Topic, number of lessons, language
+Process:
+1. User inputs topic and requirements
+2. CurriculumAgent generates structured curriculum
+3. GPT-4 creates lesson structure
+4. JSON output with lessons array
+Output: Curriculum object with lessons
+
+STEP 2: CHARACTER CREATION
+Input: Character details (name, description, voice_style, gender)
+Process:
+1. User creates character with voice preferences
+2. CharacterManager stores in database
+3. AvatarManager generates avatar using DALL-E 3
+4. TTS preview generation for voice testing
+Output: Character with avatar and voice configuration
+
+STEP 3: SCRIPT GENERATION
+Input: Lesson content, selected characters
+Process:
+1. ScriptAgent analyzes lesson content
+2. Character assignment and dialogue creation
+3. Scene breakdown with timing
+4. Visual prompt generation for each scene
+5. JSON script with scenes array
+Output: Video script with scenes, dialogue, and visual prompts
+
+STEP 4: AUDIO SYNTHESIS
+Input: Script dialogue, character voice settings
+Process:
+1. TTSManager processes each scene dialogue
+2. Voice mapping based on character settings
+3. OpenAI TTS generation for each character
+4. Audio file creation and storage
+Output: Audio files for each scene
+
+STEP 5: VISUAL CONTENT GENERATION
+Input: Visual prompts from script
+Process:
+1. Image generation using DALL-E 3
+2. Multiple images per scene for variety
+3. Image processing and optimization
+4. Storage in generated_images directory
+Output: Images for each scene
+
+STEP 6: VIDEO COMPOSITION
+Input: Images, audio files, script timing
+Process:
+1. ImageClip creation from generated images
+2. AudioFileClip creation from TTS files
+3. Audio-video synchronization
+4. Scene composition and transitions
+5. Caption overlay
+6. Final video rendering
+Output: Complete video file
+
+STEP 7: QUALITY ASSURANCE
+Input: Generated video files
+Process:
+1. QA Agent analyzes video quality
+2. Audio-visual synchronization check
+3. Character consistency validation
+4. Caption alignment verification
+5. Quality score calculation
+Output: QA report with scores and issues
+
+9.2 DATA FLOW DIAGRAM
+---------------------
+
+USER INPUT → DASHBOARD → API → CORE MODULES → AI AGENTS → EXTERNAL APIs → OUTPUT
+
+Detailed Flow:
+1. User Input (Topic, Characters, Settings)
+   ↓
+2. Streamlit Dashboard (app.py)
+   ↓
+3. FastAPI Backend (api/main.py)
+   ↓
+4. Core Modules (core/*.py)
+   ↓
+5. AI Agents (agents/*.py)
+   ↓
+6. OpenAI APIs (GPT-4, DALL-E 3, TTS-1)
+   ↓
+7. Open Source Tools (SadTalker, MoviePy, FFmpeg)
+   ↓
+8. Database Storage (SQLite)
+   ↓
+9. Output Files (Videos, Audio, Images)
+
+9.3 ERROR HANDLING FLOW
+-----------------------
+1. Input Validation
+   - Topic validation
+   - Character data validation
+   - API key validation
+
+2. Process Error Handling
+   - OpenAI API errors
+   - File generation errors
+   - Database errors
+   - Video processing errors
+
+3. Fallback Mechanisms
+   - Placeholder avatars
+   - Default voice styles
+   - Error recovery
+   - Graceful degradation
+
+================================================================================
+10. FEATURES & FUNCTIONALITY
+================================================================================
+
+10.1 CURRICULUM MANAGEMENT
+---------------------------
+FEATURES:
+- Automated curriculum generation
+- Topic analysis and scope definition
+- Learning objective identification
+- Lesson structure planning
+- Content organization
+- JSON format output
+
+FUNCTIONALITY:
+- Generate curriculum from topic
+- Customize number of lessons
+- Language selection
+- Content structure optimization
+- Export curriculum data
+
+10.2 CHARACTER MANAGEMENT
+--------------------------
+FEATURES:
+- Character creation with voice styles
+- AI-generated avatars
+- Voice preview and testing
+- Character library management
+- Usage tracking
+- Avatar regeneration
+
+VOICE STYLES:
+- Professional (8 styles)
+- Gender options (3 options)
+- Voice mapping (24 combinations)
+- Real-time preview
+- Voice comparison
+
+FUNCTIONALITY:
+- Create characters with descriptions
+- Generate avatars using DALL-E 3
+- Test voice styles before creation
+- Manage character library
+- Update character settings
+- Delete characters
+
+10.3 SCRIPT GENERATION
+-----------------------
+FEATURES:
+- Automated script creation
+- Character dialogue generation
+- Scene breakdown
+- Visual prompt creation
+- Timing optimization
+- Caption planning
+
+FUNCTIONALITY:
+- Generate scripts from lessons
+- Assign characters to scenes
+- Create natural dialogue
+- Generate visual prompts
+- Optimize scene timing
+- Add captions and overlays
+
+10.4 VOICE SYNTHESIS
+---------------------
+FEATURES:
+- OpenAI TTS integration
+- 8 voice styles
+- 3 gender options
+- Real-time preview
+- Voice testing
+- Custom instructions
+
+FUNCTIONALITY:
+- Generate speech from text
+- Map character voices
+- Preview voice styles
+- Test voice combinations
+- Download audio files
+- Custom voice instructions
+
+10.5 VIDEO GENERATION
+---------------------
+FEATURES:
+- Automated video creation
+- Avatar integration
+- Lip-sync capability
+- Educational content
+- Split-screen layout
+- Quality optimization
+
+FUNCTIONALITY:
+- Generate videos from scripts
+- Create avatar videos
+- Integrate lip-sync
+- Add educational content
+- Optimize video quality
+- Export final videos
+
+10.6 QUALITY ASSURANCE
+----------------------
+FEATURES:
+- Automated quality checking
+- Audio-visual synchronization
+- Character consistency
+- Caption alignment
+- Quality scoring
+- Issue identification
+
+FUNCTIONALITY:
+- Analyze video quality
+- Check audio sync
+- Validate character consistency
+- Verify caption alignment
+- Generate quality reports
+- Identify improvement areas
+
+10.7 DASHBOARD FEATURES
+-----------------------
+FEATURES:
+- Streamlit web interface
+- Step-by-step workflow
+- Real-time preview
+- Progress tracking
+- Cost estimation
+- File management
+
+FUNCTIONALITY:
+- Curriculum generation interface
+- Character management interface
+- Script generation interface
+- Video generation interface
+- Voice testing interface
+- File download interface
+
+================================================================================
+11. TECHNICAL SPECIFICATIONS
+================================================================================
+
+11.1 SYSTEM REQUIREMENTS
+-------------------------
+OPERATING SYSTEM:
+- macOS 10.15+
+- Ubuntu 18.04+
+- Windows 10+
+
+PYTHON VERSION:
+- Python 3.10+
+- Virtual environment support
+- Package management
+
+MEMORY REQUIREMENTS:
+- Minimum: 8GB RAM
+- Recommended: 16GB RAM
+- Video generation: 32GB RAM
+
+STORAGE REQUIREMENTS:
+- Minimum: 10GB free space
+- Video storage: 100GB+ recommended
+- Model storage: 5GB+ for SadTalker
+
+GPU REQUIREMENTS:
+- Optional: CUDA-compatible GPU
+- SadTalker acceleration
+- Video processing optimization
+
+11.2 DEPENDENCIES
+------------------
+CORE DEPENDENCIES:
+- streamlit>=1.28.0
+- openai>=1.12.0
+- Pillow>=10.0.0
+- python-dotenv>=1.0.0
+- requests>=2.28.0
+- psutil>=5.9.0
+
+VIDEO PROCESSING:
+- moviepy (Video processing)
+- ffmpeg-python (Audio/video)
+- numpy (Numerical operations)
+- opencv-python (Image processing)
+
+AI/ML DEPENDENCIES:
+- torch (PyTorch)
+- torchvision (Computer vision)
+- torchaudio (Audio processing)
+- transformers (NLP models)
+
+DATABASE:
+- sqlite3 (Built-in)
+- No additional dependencies
+
+11.3 API SPECIFICATIONS
+-----------------------
+OPENAI API:
+- GPT-4: Text generation
+- DALL-E 3: Image generation
+- TTS-1: Voice synthesis
+- Rate limits: Per API
+- Cost: Per token/request
+
+SADTALKER API:
+- Local inference
+- GPU acceleration
+- Model weights: ~2GB
+- Processing time: 30-60 seconds per video
+
+MOVIEPY API:
+- Video composition
+- Audio processing
+- Format conversion
+- Effects and transitions
+
+11.4 FILE FORMATS
+-----------------
+VIDEO FORMATS:
+- Input: MP4, AVI, MOV
+- Output: MP4 (H.264)
+- Resolution: 1920x1080
+- FPS: 30
+- Codec: H.264
+
+AUDIO FORMATS:
+- Input: MP3, WAV, M4A
+- Output: MP3
+- Sample rate: 44.1kHz
+- Bitrate: 128kbps
+- Channels: Stereo
+
+IMAGE FORMATS:
+- Input: PNG, JPG, JPEG
+- Output: PNG
+- Resolution: 1024x1024
+- Quality: High
+- Format: RGB
+
+11.5 PERFORMANCE SPECIFICATIONS
+-------------------------------
+PROCESSING TIMES:
+- Curriculum generation: 10-30 seconds
+- Character creation: 30-60 seconds
+- Script generation: 15-45 seconds
+- Voice synthesis: 5-15 seconds per scene
+- Image generation: 10-30 seconds per image
+- Video generation: 2-5 minutes per video
+- Lip-sync generation: 30-60 seconds per video
+
+QUALITY METRICS:
+- Video resolution: 1920x1080
+- Audio quality: 44.1kHz, 128kbps
+- Image quality: 1024x1024, high quality
+- Lip-sync accuracy: 90%+
+- Audio-visual sync: <100ms
+
+================================================================================
+12. DEPLOYMENT & INFRASTRUCTURE
+================================================================================
+
+12.1 LOCAL DEVELOPMENT
+-----------------------
+SETUP PROCESS:
+1. Clone repository
+2. Create virtual environment
+3. Install dependencies
+4. Configure environment variables
+5. Initialize database
+6. Download SadTalker models
+7. Test system components
+
+ENVIRONMENT VARIABLES:
+- OPENAI_API_KEY: OpenAI API key
+- DATABASE_PATH: Database file path
+- OUTPUT_DIR: Output directory
+- TEMP_DIR: Temporary files directory
+
+CONFIGURATION FILES:
+- config.py: System configuration
+- requirements.txt: Python dependencies
+- .env: Environment variables
+- Makefile: Build and deployment scripts
+
+12.2 PRODUCTION DEPLOYMENT
+---------------------------
+DEPLOYMENT OPTIONS:
+- Docker containerization
+- Cloud deployment (AWS, GCP, Azure)
+- On-premises deployment
+- Hybrid deployment
+
+INFRASTRUCTURE REQUIREMENTS:
+- Web server (Nginx, Apache)
+- Application server (Gunicorn, uWSGI)
+- Database server (PostgreSQL, MySQL)
+- File storage (S3, GCS, Azure Blob)
+- CDN for video delivery
+- Load balancer
+
+SCALING CONSIDERATIONS:
+- Horizontal scaling
+- Vertical scaling
+- Database optimization
+- Caching strategies
+- CDN integration
+- Load balancing
+
+12.3 MONITORING & LOGGING
+--------------------------
+MONITORING:
+- Application performance
+- API response times
+- Error rates
+- Resource usage
+- Cost tracking
+- User activity
+
+LOGGING:
+- Application logs
+- Error logs
+- Access logs
+- Performance logs
+- Audit logs
+- Debug logs
+
+ALERTING:
+- Error notifications
+- Performance alerts
+- Cost alerts
+- Security alerts
+- Availability alerts
+
+================================================================================
+13. COST ANALYSIS
+================================================================================
+
+13.1 OPENAI API COSTS
+---------------------
+COST STRUCTURE:
+- GPT-4 Input: $0.05 per 1K tokens
+- GPT-4 Output: $0.15 per 1K tokens
+- DALL-E 3: $0.19 per image
+- TTS-1: $0.015 per 1K characters
+
+COST ESTIMATION:
+- Curriculum generation: ~$0.10-0.30
+- Script generation: ~$0.20-0.50
+- Image generation: ~$0.95-1.90 (5-10 images)
+- Voice synthesis: ~$0.05-0.15
+- Total per video: ~$1.30-2.85
+
+13.2 INFRASTRUCTURE COSTS
+--------------------------
+COMPUTING COSTS:
+- CPU: $0.10-0.50 per hour
+- GPU: $0.50-2.00 per hour
+- Memory: $0.05-0.20 per GB/hour
+- Storage: $0.02-0.10 per GB/month
+
+STORAGE COSTS:
+- Video storage: $0.02-0.10 per GB/month
+- Image storage: $0.02-0.10 per GB/month
+- Audio storage: $0.02-0.10 per GB/month
+- Database storage: $0.02-0.10 per GB/month
+
+NETWORK COSTS:
+- Data transfer: $0.05-0.20 per GB
+- CDN delivery: $0.05-0.20 per GB
+- API calls: $0.01-0.05 per request
+
+13.3 OPTIMIZATION STRATEGIES
+-----------------------------
+COST OPTIMIZATION:
+- Batch processing
+- Caching strategies
+- Resource pooling
+- Efficient algorithms
+- Quality vs. cost trade-offs
+
+PERFORMANCE OPTIMIZATION:
+- Parallel processing
+- GPU acceleration
+- Memory optimization
+- Storage optimization
+- Network optimization
+
+================================================================================
+14. SECURITY & PRIVACY
+================================================================================
+
+14.1 API SECURITY
+------------------
+AUTHENTICATION:
+- API key management
+- Rate limiting
+- Request validation
+- Error handling
+- Logging and monitoring
+
+AUTHORIZATION:
+- Role-based access control
+- Permission management
+- Resource isolation
+- Audit trails
+- Compliance monitoring
+
+14.2 DATA SECURITY
+-------------------
+DATA PROTECTION:
+- Encryption at rest
+- Encryption in transit
+- Secure storage
+- Access controls
+- Backup and recovery
+
+PRIVACY COMPLIANCE:
+- GDPR compliance
+- Data minimization
+- User consent
+- Right to deletion
+- Privacy by design
+
+14.3 INFRASTRUCTURE SECURITY
+-----------------------------
+NETWORK SECURITY:
+- Firewall configuration
+- VPN access
+- DDoS protection
+- Intrusion detection
+- Security monitoring
+
+APPLICATION SECURITY:
+- Input validation
+- SQL injection prevention
+- XSS protection
+- CSRF protection
+- Secure coding practices
+
+================================================================================
+15. TESTING & QUALITY ASSURANCE
+================================================================================
+
+15.1 TESTING STRATEGY
+----------------------
+UNIT TESTING:
+- Module functionality
+- API endpoints
+- Database operations
+- Error handling
+- Edge cases
+
+INTEGRATION TESTING:
+- Module interactions
+- API integration
+- Database integration
+- External service integration
+- End-to-end workflows
+
+PERFORMANCE TESTING:
+- Load testing
+- Stress testing
+- Scalability testing
+- Resource usage testing
+- Response time testing
+
+15.2 QUALITY ASSURANCE
+-----------------------
+CODE QUALITY:
+- Code review process
+- Static analysis
+- Dynamic analysis
+- Security scanning
+- Performance profiling
+
+DOCUMENTATION:
+- API documentation
+- User documentation
+- Developer documentation
+- Deployment documentation
+- Maintenance documentation
+
+15.3 MONITORING & ALERTING
+---------------------------
+MONITORING:
+- Application metrics
+- Performance metrics
+- Error rates
+- Resource usage
+- User experience
+
+ALERTING:
+- Error notifications
+- Performance alerts
+- Security alerts
+- Availability alerts
+- Cost alerts
+
+================================================================================
+                                CONCLUSION
+================================================================================
+
+This educational video generation system represents a comprehensive AI-powered 
+platform for creating high-quality educational content. The architecture is 
+designed for scalability, maintainability, and extensibility, with clear 
+separation of concerns and modular design.
+
+Key strengths:
+- Modular architecture with clear responsibilities
+- Comprehensive AI agent system
+- Robust voice synthesis capabilities
+- Advanced video generation pipeline
+- Quality assurance automation
+- Cost-effective implementation
+- User-friendly interface
+
+Future enhancements:
+- Multi-language support
+- Advanced lip-sync techniques
+- Real-time collaboration
+- Mobile application
+- Advanced analytics
+- Custom model training
+
+The system is production-ready and can be deployed in various environments 
+with appropriate configuration and scaling considerations.
+
+================================================================================
+                                END OF DOCUMENT
+================================================================================
