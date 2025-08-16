@@ -21,7 +21,7 @@ An intelligent content generation pipeline that transforms topics into structure
 ```bash
 # Clone repository
 git clone <repository-url>
-cd content-factory
+cd assignment-wadhwani-submission
 
 # Install dependencies
 pip install -r requirements.txt
