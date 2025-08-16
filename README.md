@@ -43,14 +43,15 @@ streamlit run app.py
 - **QA Agent**: Performs quality checks and auto-corrections (to be implemented)
 
 ### Core Modules
+- **Curriculum Manager**: Generates Curriculum
 - **Character Manager**: SQLite-based character library
 - **TTS Manager**: Voice generation with consistency
+- **Script Manager**: Generate dialogues and Visual scenes
 - **Video Generator**: Scene assembly and rendering
 
 ## Technology Stack
 - **Frontend**: Streamlit 1.28.0
-- **LLM**: OpenAI API (Llama 3.1)
-- **TTS**: Edge-TTS 6.1.9
+- **LLM**: OpenAI API 
 - **Video**: MoviePy 1.0.3
 - **Database**: SQLite3
 - **Image Processing**: Pillow 10.1.0
